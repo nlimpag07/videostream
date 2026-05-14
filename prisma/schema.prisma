@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Anime {
+  id        Int       @id @default(autoincrement())
+  name      String
+  image     String?
+  sourceUrl String    @unique
+  createdAt DateTime  @default(now())
+  episodes  Episode[]
+}
+
+model Episode {
+  id          Int      @id @default(autoincrement())
+  anime       Anime    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId     Int
+  episodeTitle String
+  streamUrl   String
+  createdAt   DateTime @default(now())
+  sources     Source[]
+}
+
+model Source {
+  id        Int      @id @default(autoincrement())
+  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  episodeId Int
+  value     String
+  label     String?
+  createdAt DateTime @default(now())
+
+  @@unique([episodeId, value])
+}

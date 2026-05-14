@@ -1,0 +1,1 @@
+Temporary placeholder so src/ exists at root; project files will be moved from frontend/src.
