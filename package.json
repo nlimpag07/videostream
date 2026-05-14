@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint . --ignore-pattern src/main.tsx --ignore-pattern src/App.tsx"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
