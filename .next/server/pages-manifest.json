@@ -1,9 +1,0 @@
-{
-  "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js",
-  "/loadsite": "pages/loadsite.js",
-  "/api/loadsite": "pages/api/loadsite.js",
-  "/watchsource": "pages/watchsource.js",
-  "/api/watchsource": "pages/api/watchsource.js"
-}
