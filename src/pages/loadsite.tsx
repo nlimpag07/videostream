@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 type BsxItem = {
   index: number;
@@ -104,11 +105,12 @@ const LoadSitePage: React.FC = (props) => {
                   }}
                 >
                   {item.imgSrc && (
-                    <img
+                    <Image
                       src={item.imgSrc}
                       alt={item.title || 'Card image'}
+                      width={80}
+                      height={80}
                       style={{
-                        width: '80px',
                         height: 'auto',
                         borderRadius: '4px',
                         objectFit: 'cover',
