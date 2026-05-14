@@ -8,7 +8,7 @@ An anime streaming web app built with Next.js, React, TypeScript, and PostgreSQL
 - **React 19** — Frontend UI
 - **TypeScript 6** — Type safety
 - **Prisma 7** — ORM with PostgreSQL driver adapter
-- **PostgreSQL 16** — Database (managed via Docker Compose)
+- **Supabase (PostgreSQL 16)** — Cloud database
 - **styled-components 6** — CSS-in-JS styling
 - **react-player** — Video playback
 - **axios / cheerio / fast-xml-parser** — RSS scraper
@@ -16,7 +16,7 @@ An anime streaming web app built with Next.js, React, TypeScript, and PostgreSQL
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) v18+
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Supabase](https://supabase.com/) project (free tier works)
 
 ## Setup
 
@@ -28,33 +28,31 @@ npm install
 
 ### 2. Configure environment
 
-Create a `.env` file in the project root (or confirm it already exists):
+Create a `.env` file in the project root:
 
 ```env
-DATABASE_URL="postgresql://postgres:videostream@localhost:5432/videostream"
+# Runtime connection — transaction pooler (used by the app)
+DATABASE_URL="postgresql://postgres.<project-ref>:[YOUR-PASSWORD]@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true"
+
+# Direct connection — session pooler (used by Prisma Migrate)
+DIRECT_URL="postgresql://postgres.<project-ref>:[YOUR-PASSWORD]@aws-0-<region>.pooler.supabase.com:5432/postgres"
 ```
 
-### 3. Start the database
+Find both URIs in **Supabase → Project Settings → Database → Connection string**.
 
-```powershell
-docker compose up -d
-```
-
-This starts a PostgreSQL 16 container on port `5432`. Data is persisted in a Docker volume (`postgres_data`).
-
-### 4. Apply migrations
+### 3. Apply migrations
 
 ```powershell
 npx prisma migrate deploy
 ```
 
-### 5. Generate Prisma Client
+### 4. Generate Prisma Client
 
 ```powershell
 npx prisma generate
 ```
 
-### 6. Start the dev server
+### 5. Start the dev server
 
 ```powershell
 npm run dev
@@ -99,7 +97,6 @@ src/
   pages/              # Next.js pages and API routes
   components/         # Reusable UI components
   server/             # Server-side utilities (sanitization)
-docker-compose.yml    # PostgreSQL service definition
 ```
 
 ## Scripts
@@ -150,21 +147,3 @@ In **GitHub → Settings → Branches → Add rule** for `main`:
 - ✅ Dismiss stale reviews when new commits are pushed
 - ✅ Require branches to be up to date before merging
 - ✅ Do not allow bypassing the above settings
-
-env.local:
-# Connect to Supabase via connection pooling
-DATABASE_URL="postgresql://postgres.qhnaigeqanbosvbxxfcn:[YOUR-PASSWORD]@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
-
-# Direct connection to the database. Used for migrations
-DIRECT_URL="postgresql://postgres.qhnaigeqanbosvbxxfcn:[YOUR-PASSWORD]@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
-
-prisma/schema.prisma:
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
-}

@@ -23,6 +23,8 @@ model Episode {
   streamUrl   String
   createdAt   DateTime @default(now())
   sources     Source[]
+
+  @@unique([animeId, episodeTitle])
 }
 
 model Source {
