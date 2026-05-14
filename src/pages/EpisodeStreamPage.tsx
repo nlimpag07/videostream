@@ -97,7 +97,7 @@ const EpisodeStreamPage: React.FC = () => {
 
   const { streamUrl } = episode;
   const useReactPlayer =
-    streamUrl.endsWith('.mp4') || streamUrl.endsWith('.m3u8') || ReactPlayer.canPlay(streamUrl);
+    streamUrl.endsWith('.mp4') || streamUrl.endsWith('.m3u8') || !!ReactPlayer?.canPlay?.(streamUrl);
 
   return (
     <Container>
@@ -125,7 +125,7 @@ const EpisodeStreamPage: React.FC = () => {
       )}
       <PlayerWrapper>
         {useReactPlayer ? (
-          <ReactPlayer url={streamUrl} controls playing width="100%" height="100%" />
+          <ReactPlayer src={streamUrl} controls playing width="100%" height="100%" />
         ) : (
           <Iframe src={streamUrl} title={episode.episodeTitle} allowFullScreen />
         )}
