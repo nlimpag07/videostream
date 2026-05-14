@@ -110,3 +110,61 @@ docker-compose.yml    # PostgreSQL service definition
 | `npm run build` | Build for production |
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint |
+
+## CI/CD Pipeline
+
+Every push to `main` triggers an automated deploy via GitHub Actions:
+
+```
+push to main
+  └─ migrate   →  npx prisma migrate deploy  (Supabase PostgreSQL)
+       └─ deploy  →  vercel deploy --prod
+```
+
+PRs targeting `main` must pass two status checks before merge is allowed:
+- `ci / test` — ESLint
+- `ci / build` — Production build
+
+### Required GitHub Secrets
+
+Add these under **Settings → Secrets and Variables → Actions**:
+
+| Secret | Where to find it |
+|--------|-----------------|
+| `DATABASE_URL` | Supabase → Project Settings → Database → **Transaction pooler** URI (port `6543`, `?pgbouncer=true`) — used by the app at runtime |
+| `DIRECT_URL` | Supabase → Project Settings → Database → **Direct connection** URI (port `5432`) — used by Prisma Migrate |
+| `VERCEL_TOKEN` | Vercel → Account Settings → Tokens |
+| `VERCEL_ORG_ID` | Vercel → Project Settings → General |
+| `VERCEL_PROJECT_ID` | Vercel → Project Settings → General |
+
+> **Important:** `DIRECT_URL` (port `5432`) is only used by Prisma Migrate in CI. The app itself always connects via the pooler (`DATABASE_URL`, port `6543`).
+
+Also set both `DATABASE_URL` and `DIRECT_URL` in Vercel's environment variables (Production).
+
+### Branch Protection Setup
+
+In **GitHub → Settings → Branches → Add rule** for `main`:
+
+- ✅ Require a pull request before merging (1 approval)
+- ✅ Require status checks: `ci / test` and `ci / build`
+- ✅ Dismiss stale reviews when new commits are pushed
+- ✅ Require branches to be up to date before merging
+- ✅ Do not allow bypassing the above settings
+
+env.local:
+# Connect to Supabase via connection pooling
+DATABASE_URL="postgresql://postgres.qhnaigeqanbosvbxxfcn:[YOUR-PASSWORD]@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+
+# Direct connection to the database. Used for migrations
+DIRECT_URL="postgresql://postgres.qhnaigeqanbosvbxxfcn:[YOUR-PASSWORD]@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+
+prisma/schema.prisma:
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
