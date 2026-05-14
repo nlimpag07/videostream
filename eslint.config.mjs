@@ -1,7 +1,7 @@
-import nextConfig from 'eslint-config-next';
+import nextVitalsConfig from 'eslint-config-next/core-web-vitals';
 
 const config = [
-	...nextConfig,
+	...nextVitalsConfig,
 	{
 		ignores: ['.next/**', 'node_modules/**', '.vercel/**'],
 	},
